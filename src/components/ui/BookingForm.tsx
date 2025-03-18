@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Clock, ArrowRight, CreditCard, Wallet, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const BookingForm = () => {
   const [step, setStep] = useState(1);
@@ -47,11 +48,39 @@ const BookingForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Simulate sending email by adding a delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Save booking to database
+      const { data: bookingData, error: bookingError } = await supabase
+        .from('bookings')
+        .insert([
+          {
+            service: formData.service,
+            date: formData.date,
+            time: formData.time,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.address,
+            notes: formData.notes || null,
+            payment_method: formData.paymentMethod
+          }
+        ])
+        .select();
+
+      if (bookingError) {
+        throw new Error("Failed to save booking: " + bookingError.message);
+      }
+
+      console.log("Booking saved to database:", bookingData);
       
-      // Email would be sent here in a real implementation
-      // This is where you would connect to a backend service
+      // Send confirmation email
+      const emailResponse = await supabase.functions.invoke('send-booking-confirmation', {
+        body: formData,
+      });
+
+      if (emailResponse.error) {
+        console.warn("Email sending error:", emailResponse.error);
+        // Continue execution even if email fails
+      }
       
       // Show success toast
       toast({
