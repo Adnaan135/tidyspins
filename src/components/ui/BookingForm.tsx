@@ -73,13 +73,25 @@ const BookingForm = () => {
       console.log("Booking saved to database:", bookingData);
       
       // Send confirmation email
-      const emailResponse = await supabase.functions.invoke('send-booking-confirmation', {
-        body: formData,
+      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-booking-confirmation', {
+        body: {
+          service: formData.service,
+          date: formData.date,
+          time: formData.time,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          notes: formData.notes,
+          paymentMethod: formData.paymentMethod
+        },
       });
 
-      if (emailResponse.error) {
-        console.warn("Email sending error:", emailResponse.error);
+      if (emailError) {
+        console.warn("Email sending error:", emailError);
         // Continue execution even if email fails
+      } else {
+        console.log("Email confirmation sent:", emailData);
       }
       
       // Show success toast
@@ -525,3 +537,7 @@ const PaymentOption = ({ title, description, icon, selected, onClick }: {
 };
 
 export default BookingForm;
+
+
+
+
