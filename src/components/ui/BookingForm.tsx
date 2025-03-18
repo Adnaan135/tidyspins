@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, CreditCard, Wallet, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,7 +16,8 @@ const BookingForm = () => {
     email: '',
     phone: '',
     address: '',
-    notes: ''
+    notes: '',
+    paymentMethod: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -32,6 +32,13 @@ const BookingForm = () => {
     setFormData(prevData => ({
       ...prevData,
       service
+    }));
+  };
+
+  const handlePaymentSelect = (paymentMethod: string) => {
+    setFormData(prevData => ({
+      ...prevData,
+      paymentMethod
     }));
   };
 
@@ -62,7 +69,8 @@ const BookingForm = () => {
         email: '',
         phone: '',
         address: '',
-        notes: ''
+        notes: '',
+        paymentMethod: ''
       });
     } catch (error) {
       toast({
@@ -109,6 +117,12 @@ const BookingForm = () => {
           <div 
             className={`flex-1 h-2 rounded-full ${
               step >= 3 ? 'bg-neatspin-500' : 'bg-gray-200'
+            } transition-all duration-300`}
+          />
+          <div className="w-1" />
+          <div 
+            className={`flex-1 h-2 rounded-full ${
+              step >= 4 ? 'bg-neatspin-500' : 'bg-gray-200'
             } transition-all duration-300`}
           />
         </div>
@@ -295,6 +309,78 @@ const BookingForm = () => {
                   variant="outline" 
                   onClick={prevStep}
                   className="border-gray-300 text-gray-700"
+                >
+                  Back
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={nextStep}
+                  className="bg-neatspin-600 hover:bg-neatspin-700 text-white button-hover-effect"
+                  disabled={!formData.name || !formData.email || !formData.phone || !formData.address}
+                >
+                  Continue
+                  <ArrowRight size={16} className="ml-2" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="animate-fade-in">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Payment Method</h3>
+              
+              <div className="grid grid-cols-1 gap-4 mb-6">
+                <PaymentOption
+                  title="Credit Card"
+                  description="Pay securely with your credit card"
+                  icon={<CreditCard className="text-neatspin-500" size={24} />}
+                  selected={formData.paymentMethod === 'credit-card'}
+                  onClick={() => handlePaymentSelect('credit-card')}
+                />
+                
+                <PaymentOption
+                  title="Digital Wallet"
+                  description="Apple Pay, Google Pay, or PayPal"
+                  icon={<Wallet className="text-neatspin-500" size={24} />}
+                  selected={formData.paymentMethod === 'digital-wallet'}
+                  onClick={() => handlePaymentSelect('digital-wallet')}
+                />
+                
+                <PaymentOption
+                  title="Pay Later"
+                  description="Pay in cash or card during pickup"
+                  icon={<DollarSign className="text-neatspin-500" size={24} />}
+                  selected={formData.paymentMethod === 'pay-later'}
+                  onClick={() => handlePaymentSelect('pay-later')}
+                />
+              </div>
+
+              <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h4 className="font-medium text-gray-900 mb-2">Order Summary</h4>
+                <div className="flex justify-between text-gray-600 mb-1">
+                  <span>Service:</span>
+                  <span className="font-medium">{formData.service === 'basic' ? 'Basic Wash' : formData.service === 'premium' ? 'Premium Care' : 'Family Bundle'}</span>
+                </div>
+                <div className="flex justify-between text-gray-600 mb-1">
+                  <span>Price:</span>
+                  <span className="font-medium">{formData.service === 'basic' ? '$19.99' : formData.service === 'premium' ? '$29.99' : '$49.99'}</span>
+                </div>
+                <div className="flex justify-between text-gray-600 mb-1">
+                  <span>Pickup Date:</span>
+                  <span className="font-medium">{formData.date}</span>
+                </div>
+                <div className="flex justify-between text-gray-600 mb-1">
+                  <span>Pickup Time:</span>
+                  <span className="font-medium">{formData.time}</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-between mt-6">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={prevStep}
+                  className="border-gray-300 text-gray-700"
                   disabled={isSubmitting}
                 >
                   Back
@@ -302,7 +388,7 @@ const BookingForm = () => {
                 <Button 
                   type="submit" 
                   className="bg-neatspin-600 hover:bg-neatspin-700 text-white button-hover-effect"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !formData.paymentMethod}
                 >
                   {isSubmitting ? (
                     <span className="flex items-center">
@@ -312,7 +398,7 @@ const BookingForm = () => {
                       </svg>
                       Processing...
                     </span>
-                  ) : "Book Now"}
+                  ) : "Complete Booking"}
                 </Button>
               </div>
             </div>
@@ -359,6 +445,50 @@ const ServiceOption = ({ title, description, price, selected, onClick }: {
               </svg>
             )}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PaymentOption = ({ title, description, icon, selected, onClick }: { 
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  selected: boolean;
+  onClick: () => void;
+}) => {
+  return (
+    <div
+      className={`border rounded-xl p-4 cursor-pointer transition-all duration-200 ${
+        selected 
+          ? 'border-neatspin-500 bg-neatspin-50 shadow-sm' 
+          : 'border-gray-200 hover:border-neatspin-300'
+      }`}
+      onClick={onClick}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <div className="mr-4">
+            {icon}
+          </div>
+          <div>
+            <h4 className="font-medium text-gray-900">{title}</h4>
+            <p className="text-sm text-gray-600">{description}</p>
+          </div>
+        </div>
+        <div 
+          className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+            selected 
+              ? 'border-neatspin-500 bg-neatspin-500' 
+              : 'border-gray-300'
+          }`}
+        >
+          {selected && (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="12" height="12">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+            </svg>
+          )}
         </div>
       </div>
     </div>
