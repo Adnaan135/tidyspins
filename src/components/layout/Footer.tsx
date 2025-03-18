@@ -1,4 +1,3 @@
-
 import { Phone, Mail, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -49,11 +48,11 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start">
                 <Phone size={18} className="text-neatspin-500 mt-1 mr-3" />
-                <span className="text-gray-600">123-456-7890</span>
+                <span className="text-gray-600">0542809098</span>
               </li>
               <li className="flex items-start">
                 <Mail size={18} className="text-neatspin-500 mt-1 mr-3" />
-                <span className="text-gray-600">hello@neatspin.com</span>
+                <span className="text-gray-600">adnaanabdulkarim135@gmail.com</span>
               </li>
               <li className="flex items-start">
                 <MapPin size={18} className="text-neatspin-500 mt-1 mr-3" />

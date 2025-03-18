@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -43,7 +42,6 @@ const Header = () => {
           </a>
         </div>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <button 
             onClick={() => scrollToSection('services')}
@@ -77,15 +75,13 @@ const Header = () => {
           </Button>
         </nav>
 
-        {/* Phone number on large screens */}
         <div className="hidden lg:flex items-center">
-          <a href="tel:+1234567890" className="flex items-center text-gray-700 hover:text-neatspin-600 transition-colors">
+          <a href="tel:+0542809098" className="flex items-center text-gray-700 hover:text-neatspin-600 transition-colors">
             <Phone size={18} className="mr-2" />
-            <span className="font-medium">123-456-7890</span>
+            <span className="font-medium">0542809098</span>
           </a>
         </div>
 
-        {/* Mobile menu button */}
         <button className="md:hidden" onClick={toggleMobileMenu}>
           {mobileMenuOpen ? (
             <X size={24} className="text-gray-700" />
@@ -95,7 +91,6 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-md animate-fade-in">
           <div className="flex flex-col p-4 space-y-4">
@@ -123,9 +118,9 @@ const Header = () => {
             >
               Contact
             </button>
-            <a href="tel:+1234567890" className="flex items-center text-gray-700 hover:text-neatspin-600 transition-colors py-2">
+            <a href="tel:+0542809098" className="flex items-center text-gray-700 hover:text-neatspin-600 transition-colors py-2">
               <Phone size={18} className="mr-2" />
-              <span className="font-medium">123-456-7890</span>
+              <span className="font-medium">0542809098</span>
             </a>
             <Button 
               className="bg-neatspin-600 hover:bg-neatspin-700 text-white rounded-full px-6 button-hover-effect w-full"

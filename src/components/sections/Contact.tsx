@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -92,7 +91,7 @@ const Contact = () => {
                   </div>
                   <div className="ml-4">
                     <h4 className="font-medium text-gray-900">Phone Number</h4>
-                    <p className="text-gray-600">123-456-7890</p>
+                    <p className="text-gray-600">0542809098</p>
                   </div>
                 </li>
                 
@@ -102,7 +101,7 @@ const Contact = () => {
                   </div>
                   <div className="ml-4">
                     <h4 className="font-medium text-gray-900">Email Address</h4>
-                    <p className="text-gray-600">hello@neatspin.com</p>
+                    <p className="text-gray-600">adnaanabdulkarim135@gmail.com</p>
                   </div>
                 </li>
                 
