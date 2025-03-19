@@ -48,7 +48,6 @@ const BookingForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Save booking to database
       const { data: bookingData, error: bookingError } = await supabase
         .from('bookings')
         .insert([
@@ -72,7 +71,6 @@ const BookingForm = () => {
 
       console.log("Booking saved to database:", bookingData);
       
-      // Send confirmation email
       const { data: emailData, error: emailError } = await supabase.functions.invoke('send-booking-confirmation', {
         body: {
           service: formData.service,
@@ -94,13 +92,11 @@ const BookingForm = () => {
         console.log("Email confirmation sent:", emailData);
       }
       
-      // Show success toast
       toast({
         title: "Booking Confirmed!",
         description: `We've sent a confirmation email to ${formData.email}. We'll contact you shortly to confirm your pickup.`,
       });
       
-      // Reset form
       setStep(1);
       setFormData({
         service: '',
@@ -177,7 +173,7 @@ const BookingForm = () => {
                 <ServiceOption
                   title="Basic Wash"
                   description="Wash & Fold for everyday clothes"
-                  price="$19.99/load"
+                  price="₵19.99/load"
                   selected={formData.service === 'basic'}
                   onClick={() => handleServiceSelect('basic')}
                 />
@@ -185,7 +181,7 @@ const BookingForm = () => {
                 <ServiceOption
                   title="Premium Care"
                   description="Wash, Dry & Press for business attire"
-                  price="$29.99/load"
+                  price="₵29.99/load"
                   selected={formData.service === 'premium'}
                   onClick={() => handleServiceSelect('premium')}
                 />
@@ -193,7 +189,7 @@ const BookingForm = () => {
                 <ServiceOption
                   title="Family Bundle"
                   description="Up to 20 lbs of laundry, sorting included"
-                  price="$49.99/bundle"
+                  price="₵49.99/bundle"
                   selected={formData.service === 'family'}
                   onClick={() => handleServiceSelect('family')}
                 />
@@ -404,7 +400,7 @@ const BookingForm = () => {
                 </div>
                 <div className="flex justify-between text-gray-600 mb-1">
                   <span>Price:</span>
-                  <span className="font-medium">{formData.service === 'basic' ? '$19.99' : formData.service === 'premium' ? '$29.99' : '$49.99'}</span>
+                  <span className="font-medium">{formData.service === 'basic' ? '₵19.99' : formData.service === 'premium' ? '₵29.99' : '₵49.99'}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 mb-1">
                   <span>Pickup Date:</span>
@@ -537,7 +533,3 @@ const PaymentOption = ({ title, description, icon, selected, onClick }: {
 };
 
 export default BookingForm;
-
-
-
-

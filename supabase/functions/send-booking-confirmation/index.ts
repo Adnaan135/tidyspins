@@ -38,13 +38,13 @@ const handler = async (req: Request): Promise<Response> => {
     
     if (booking.service === "basic") {
       serviceName = "Basic Wash";
-      servicePrice = "$19.99";
+      servicePrice = "₵19.99";
     } else if (booking.service === "premium") {
       serviceName = "Premium Care";
-      servicePrice = "$29.99";
+      servicePrice = "₵29.99";
     } else if (booking.service === "family") {
       serviceName = "Family Bundle";
-      servicePrice = "$49.99";
+      servicePrice = "₵49.99";
     }
 
     // Format payment method for display

@@ -25,12 +25,12 @@ const Services = () => {
           <ServiceCard
             title="Basic Wash"
             icon={<WashingMachine size={28} className="text-neatspin-600" />}
-            price="$19.99"
+            price="₵19.99"
             description="Perfect for everyday clothes and small loads."
             features={[
               "Wash & Fold",
               "48-hour turnaround",
-              "Free pickup for orders $30+",
+              "Free pickup for orders ₵30+",
               "Eco-friendly detergents"
             ]}
             delay={0.1}
@@ -39,7 +39,7 @@ const Services = () => {
           <ServiceCard
             title="Premium Care"
             icon={<Shirt size={28} className="text-neatspin-600" />}
-            price="$29.99"
+            price="₵29.99"
             description="Ideal for business attire and delicate fabrics."
             features={[
               "Wash, Dry & Press",
@@ -55,7 +55,7 @@ const Services = () => {
           <ServiceCard
             title="Family Bundle"
             icon={<ShoppingBag size={28} className="text-neatspin-600" />}
-            price="$49.99"
+            price="₵49.99"
             description="Best value for families and larger households."
             features={[
               "Up to 20 lbs of laundry",
@@ -80,19 +80,19 @@ const Services = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               <div className="p-4 rounded-xl bg-gray-50 hover:bg-neatspin-50 transition-colors">
                 <h4 className="font-medium text-gray-900 mb-2">Dry Cleaning</h4>
-                <p className="text-gray-600 text-sm">From $8.99 per item</p>
+                <p className="text-gray-600 text-sm">From ₵8.99 per item</p>
               </div>
               <div className="p-4 rounded-xl bg-gray-50 hover:bg-neatspin-50 transition-colors">
                 <h4 className="font-medium text-gray-900 mb-2">Ironing Service</h4>
-                <p className="text-gray-600 text-sm">From $3.99 per item</p>
+                <p className="text-gray-600 text-sm">From ₵3.99 per item</p>
               </div>
               <div className="p-4 rounded-xl bg-gray-50 hover:bg-neatspin-50 transition-colors">
                 <h4 className="font-medium text-gray-900 mb-2">Stain Removal</h4>
-                <p className="text-gray-600 text-sm">From $5.99 per item</p>
+                <p className="text-gray-600 text-sm">From ₵5.99 per item</p>
               </div>
               <div className="p-4 rounded-xl bg-gray-50 hover:bg-neatspin-50 transition-colors">
                 <h4 className="font-medium text-gray-900 mb-2">Bedding & Linens</h4>
-                <p className="text-gray-600 text-sm">From $14.99 per item</p>
+                <p className="text-gray-600 text-sm">From ₵14.99 per item</p>
               </div>
             </div>
           </div>
