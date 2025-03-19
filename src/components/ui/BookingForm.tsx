@@ -95,11 +95,20 @@ const BookingForm = () => {
         });
       } else {
         console.log("Email confirmation sent successfully:", emailData);
-        toast({
-          title: "Booking Confirmed!",
-          description: `We've sent a confirmation email to ${formData.email}. We'll contact you shortly to confirm your pickup.`,
-          variant: "default",
-        });
+        
+        if (emailData && emailData.testMode) {
+          toast({
+            title: "Booking Confirmed! (Test Mode)",
+            description: `During development, emails are sent to a test address. In production, the confirmation would be sent to ${formData.email}.`,
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Booking Confirmed!",
+            description: `We've sent a confirmation email to ${formData.email}. We'll contact you shortly to confirm your pickup.`,
+            variant: "default",
+          });
+        }
       }
       
       setStep(1);

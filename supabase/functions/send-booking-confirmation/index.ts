@@ -64,16 +64,21 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Attempting to send email with Resend...");
     
-    // Send email to customer
+    // Get the allowed email for testing
+    const testingEmail = "adnaanabdulkarim@icloud.com"; // This is the only email allowed during testing
+    
+    // Send email to the testing email during development
+    // In production, this would send to the actual customer email
     const emailResponse = await resend.emails.send({
       from: "NeatSpin Laundry <onboarding@resend.dev>",
-      to: [booking.email],
-      subject: "Your NeatSpin Laundry Booking Confirmation",
+      to: [testingEmail], // Always send to the testing email for now
+      subject: `[TEST] Booking Confirmation for ${booking.name}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px;">
           <div style="text-align: center; margin-bottom: 20px;">
             <h1 style="color: #3b82f6; margin-bottom: 10px;">NeatSpin Laundry</h1>
             <p style="font-size: 18px; color: #333;">Booking Confirmation</p>
+            <p style="font-size: 16px; color: #e11d48; font-weight: bold;">TEST EMAIL - Would normally be sent to: ${booking.email}</p>
           </div>
           
           <div style="margin-bottom: 30px;">
@@ -124,7 +129,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email response from Resend:", emailResponse);
 
-    return new Response(JSON.stringify({ success: true, emailResponse }), {
+    // Modify the response to handle Resend's testing limitations
+    const successResponse = {
+      success: true,
+      testMode: true, 
+      sentToTestEmail: testingEmail,
+      intendedRecipient: booking.email,
+      emailResponse
+    };
+
+    return new Response(JSON.stringify(successResponse), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
