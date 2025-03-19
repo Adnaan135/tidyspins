@@ -64,16 +64,16 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				neatspin: {
-					50: '#f0f9ff',
-					100: '#e0f2fe',
-					200: '#bae6fd',
-					300: '#7dd3fc',
-					400: '#38bdf8',
-					500: '#0ea5e9',
-					600: '#0284c7',
-					700: '#0369a1',
-					800: '#075985',
-					900: '#0c4a6e',
+					50: '#edf1f2',
+					100: '#d1dadd',
+					200: '#a3b5ba',
+					300: '#758f97',
+					400: '#476a73',
+					500: '#2a454b', // Medium shade from your colors
+					600: '#1e3136',
+					700: '#122024',
+					800: '#0e1c26', // Darkest shade from your colors
+					900: '#071012',
 				}
 			},
 			borderRadius: {
