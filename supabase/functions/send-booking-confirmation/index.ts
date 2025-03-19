@@ -2,7 +2,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Initialize Resend with the API key from environment variable
+const resendApiKey = Deno.env.get("RESEND_API_KEY");
+const resend = new Resend(resendApiKey);
+
+// Debugging: Log whether the API key was successfully retrieved
+console.log(`Resend API key found: ${resendApiKey ? "Yes" : "No"}`);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Format the service name for display
     let serviceName = "Unknown Service";
-    let servicePrice = "Unknown Price";
+    let servicePrice = "₵19.99";
     
     if (booking.service === "basic") {
       serviceName = "Basic Wash";
@@ -57,6 +62,8 @@ const handler = async (req: Request): Promise<Response> => {
       paymentMethodName = "Pay Later (during pickup)";
     }
 
+    console.log("Attempting to send email with Resend...");
+    
     // Send email to customer
     const emailResponse = await resend.emails.send({
       from: "NeatSpin Laundry <onboarding@resend.dev>",
@@ -115,9 +122,9 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Email response from Resend:", emailResponse);
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, emailResponse }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -127,7 +134,11 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error) {
     console.error("Error in send-booking-confirmation function:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Unknown error occurred" }),
+      JSON.stringify({ 
+        error: error.message || "Unknown error occurred",
+        stack: error.stack,
+        name: error.name
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

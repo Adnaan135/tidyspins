@@ -71,6 +71,7 @@ const BookingForm = () => {
 
       console.log("Booking saved to database:", bookingData);
       
+      console.log("Sending confirmation email to:", formData.email);
       const { data: emailData, error: emailError } = await supabase.functions.invoke('send-booking-confirmation', {
         body: {
           service: formData.service,
@@ -86,16 +87,20 @@ const BookingForm = () => {
       });
 
       if (emailError) {
-        console.warn("Email sending error:", emailError);
-        // Continue execution even if email fails
+        console.error("Email sending error:", emailError);
+        toast({
+          title: "Booking Confirmed",
+          description: "Your booking was saved, but there was an issue sending the confirmation email. Our team will contact you shortly.",
+          variant: "default",
+        });
       } else {
-        console.log("Email confirmation sent:", emailData);
+        console.log("Email confirmation sent successfully:", emailData);
+        toast({
+          title: "Booking Confirmed!",
+          description: `We've sent a confirmation email to ${formData.email}. We'll contact you shortly to confirm your pickup.`,
+          variant: "default",
+        });
       }
-      
-      toast({
-        title: "Booking Confirmed!",
-        description: `We've sent a confirmation email to ${formData.email}. We'll contact you shortly to confirm your pickup.`,
-      });
       
       setStep(1);
       setFormData({
@@ -110,12 +115,12 @@ const BookingForm = () => {
         paymentMethod: ''
       });
     } catch (error) {
+      console.error("Booking error:", error);
       toast({
         title: "Booking Failed",
         description: "There was a problem processing your booking. Please try again.",
         variant: "destructive",
       });
-      console.error("Booking error:", error);
     } finally {
       setIsSubmitting(false);
     }
