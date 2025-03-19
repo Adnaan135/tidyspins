@@ -34,6 +34,7 @@ const Services = () => {
               "Eco-friendly detergents"
             ]}
             delay={0.1}
+            serviceId="basic"
           />
 
           <ServiceCard
@@ -50,6 +51,7 @@ const Services = () => {
             ]}
             isPopular={true}
             delay={0.2}
+            serviceId="premium"
           />
 
           <ServiceCard
@@ -65,6 +67,7 @@ const Services = () => {
               "Folding & packaging"
             ]}
             delay={0.3}
+            serviceId="family"
           />
         </div>
 

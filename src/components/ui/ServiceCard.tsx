@@ -2,6 +2,8 @@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
 
 interface ServiceCardProps {
   title: string;
@@ -11,6 +13,7 @@ interface ServiceCardProps {
   features: string[];
   isPopular?: boolean;
   delay?: number;
+  serviceId?: "basic" | "premium" | "family";
 }
 
 const ServiceCard = ({
@@ -20,8 +23,38 @@ const ServiceCard = ({
   description,
   features,
   isPopular = false,
-  delay = 0
+  delay = 0,
+  serviceId = "basic"
 }: ServiceCardProps) => {
+  const navigate = useNavigate();
+
+  const handleChoosePlan = () => {
+    // Get the booking section's element
+    const bookingSection = document.getElementById('booking');
+    
+    // Scroll to the booking section
+    if (bookingSection) {
+      bookingSection.scrollIntoView({ behavior: 'smooth' });
+      
+      // Set a small timeout to ensure the form is in view before attempting to set the value
+      setTimeout(() => {
+        // Try to find and set the service select dropdown value
+        const serviceSelect = document.querySelector('select[name="service"]') as HTMLSelectElement;
+        if (serviceSelect) {
+          serviceSelect.value = serviceId;
+          // Dispatch a change event to ensure form state is updated
+          serviceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          
+          toast({
+            title: `${title} Selected`,
+            description: "We've pre-selected this plan for you. Complete the booking form to schedule your pickup.",
+            variant: "default",
+          });
+        }
+      }, 800);
+    }
+  };
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -71,6 +104,7 @@ const ServiceCard = ({
         </div>
         
         <button
+          onClick={handleChoosePlan}
           className={cn(
             "w-full py-3 rounded-lg font-medium transition-all duration-200",
             isPopular
