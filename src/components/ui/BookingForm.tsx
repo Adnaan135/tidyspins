@@ -5,6 +5,12 @@ import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+interface EmailUpdate {
+  emailId: string;
+  scheduleTime?: string;
+  cancel?: boolean;
+}
+
 const BookingForm = () => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,8 +24,11 @@ const BookingForm = () => {
     phone: '',
     address: '',
     notes: '',
-    paymentMethod: ''
+    paymentMethod: '',
+    scheduleEmailFor: ''
   });
+  
+  const [sentEmailId, setSentEmailId] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -43,11 +52,54 @@ const BookingForm = () => {
     }));
   };
 
+  const updateScheduledEmail = async (updateData: EmailUpdate) => {
+    if (!sentEmailId) {
+      toast({
+        title: "No email to update",
+        description: "There is no sent email to update.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-booking-confirmation/update-email', {
+        body: {
+          emailId: sentEmailId,
+          ...updateData
+        }
+      });
+
+      if (error) {
+        throw new Error("Failed to update email: " + error.message);
+      }
+
+      console.log("Email update response:", data);
+      
+      toast({
+        title: data.action === "cancelled" ? "Email Cancelled" : "Email Rescheduled",
+        description: `The confirmation email has been ${data.action} successfully.`,
+        variant: "default",
+      });
+      
+    } catch (error) {
+      console.error("Email update error:", error);
+      toast({
+        title: "Update Failed",
+        description: "Failed to update the scheduled email. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
+      const scheduleTime = formData.scheduleEmailFor ? 
+        new Date(formData.scheduleEmailFor).toISOString() : undefined;
+      
       const { data: bookingData, error: bookingError } = await supabase
         .from('bookings')
         .insert([
@@ -82,7 +134,8 @@ const BookingForm = () => {
           phone: formData.phone,
           address: formData.address,
           notes: formData.notes,
-          paymentMethod: formData.paymentMethod
+          paymentMethod: formData.paymentMethod,
+          scheduleTime: scheduleTime
         },
       });
 
@@ -96,10 +149,16 @@ const BookingForm = () => {
       } else {
         console.log("Email confirmation sent successfully:", emailData);
         
+        if (emailData && emailData.emailResponse && emailData.emailResponse.id) {
+          setSentEmailId(emailData.emailResponse.id);
+        }
+        
         if (emailData && emailData.testMode) {
+          const scheduledMsg = scheduleTime ? " It has been scheduled to be sent later." : "";
+          
           toast({
             title: "Booking Confirmed! (Test Mode)",
-            description: `During development, emails are sent to a test address. In production, the confirmation would be sent to ${formData.email}.`,
+            description: `During development, emails are sent to a test address. In production, the confirmation would be sent to ${formData.email}.${scheduledMsg}`,
             variant: "default",
           });
         } else {
@@ -121,7 +180,8 @@ const BookingForm = () => {
         phone: '',
         address: '',
         notes: '',
-        paymentMethod: ''
+        paymentMethod: '',
+        scheduleEmailFor: ''
       });
     } catch (error) {
       console.error("Booking error:", error);
@@ -406,6 +466,24 @@ const BookingForm = () => {
                 />
               </div>
 
+              <div className="mt-6 mb-6">
+                <label className="block text-gray-700 mb-2">Schedule Confirmation Email (Optional)</label>
+                <div className="relative">
+                  <input
+                    type="datetime-local"
+                    name="scheduleEmailFor"
+                    value={formData.scheduleEmailFor}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neatspin-500 focus:border-transparent pl-10"
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Leave empty to send immediately, or select a future date and time to schedule the confirmation email.
+                </p>
+              </div>
+
               <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <h4 className="font-medium text-gray-900 mb-2">Order Summary</h4>
                 <div className="flex justify-between text-gray-600 mb-1">
@@ -452,6 +530,37 @@ const BookingForm = () => {
                   ) : "Complete Booking"}
                 </Button>
               </div>
+              
+              {sentEmailId && (
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <h4 className="font-medium text-gray-900 mb-2">Manage Confirmation Email</h4>
+                  <div className="grid grid-cols-1 gap-3 mt-3">
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => {
+                        const newTime = new Date(Date.now() + 1000 * 60).toISOString(); // 1 minute from now
+                        updateScheduledEmail({ emailId: sentEmailId, scheduleTime: newTime });
+                      }}
+                      className="border-gray-300 text-gray-700"
+                    >
+                      Reschedule for 1 Minute Later
+                    </Button>
+                    
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => updateScheduledEmail({ emailId: sentEmailId, cancel: true })}
+                      className="border-red-300 text-red-700 hover:bg-red-50"
+                    >
+                      Cancel Scheduled Email
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    These options are only available for testing and would typically be part of an admin interface.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </form>

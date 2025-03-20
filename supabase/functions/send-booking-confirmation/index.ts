@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
@@ -27,13 +26,73 @@ interface BookingRequest {
   paymentMethod: string;
 }
 
+interface EmailUpdateRequest {
+  emailId: string;
+  scheduleTime?: string;  // ISO string for scheduling
+  cancel?: boolean;       // Flag to cancel a scheduled email
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const url = new URL(req.url);
+  const path = url.pathname.split('/').pop(); // Get the last part of the path
+
   try {
+    // Handle email update requests
+    if (path === "update-email") {
+      const updateData: EmailUpdateRequest = await req.json();
+      
+      console.log("Updating scheduled email:", updateData);
+      
+      // If cancel flag is true, cancel the scheduled email
+      if (updateData.cancel) {
+        const cancelResponse = await resend.emails.cancel({
+          id: updateData.emailId,
+        });
+        
+        console.log("Cancel email response:", cancelResponse);
+        
+        return new Response(
+          JSON.stringify({ success: true, action: "cancelled", response: cancelResponse }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          }
+        );
+      }
+      
+      // Otherwise update the scheduled time
+      if (updateData.scheduleTime) {
+        const updateResponse = await resend.emails.update({
+          id: updateData.emailId,
+          scheduledAt: updateData.scheduleTime,
+        });
+        
+        console.log("Update email response:", updateResponse);
+        
+        return new Response(
+          JSON.stringify({ success: true, action: "updated", response: updateResponse }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ error: "Invalid update request. Provide either 'scheduleTime' or 'cancel' parameter." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+    
+    // Handle sending new booking confirmation emails (default behavior)
     const booking: BookingRequest = await req.json();
     console.log("Processing booking confirmation for:", booking.email);
 
@@ -67,9 +126,11 @@ const handler = async (req: Request): Promise<Response> => {
     // Get the allowed email for testing
     const testingEmail = "adnaanabdulkarim@icloud.com"; // This is the only email allowed during testing
     
-    // Send email to the testing email during development
-    // In production, this would send to the actual customer email
-    const emailResponse = await resend.emails.send({
+    // Get scheduling information if it's provided in the request
+    const scheduleTime = booking.scheduleTime || null;
+    
+    // Prepare email sending options
+    const emailOptions = {
       from: "NeatSpin Laundry <onboarding@resend.dev>",
       to: [testingEmail], // Always send to the testing email for now
       subject: `[TEST] Booking Confirmation for ${booking.name}`,
@@ -125,7 +186,15 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
         </div>
       `,
-    });
+    };
+    
+    // Add scheduling information if provided
+    if (scheduleTime) {
+      emailOptions.scheduledAt = scheduleTime;
+    }
+    
+    // Send the email
+    const emailResponse = await resend.emails.send(emailOptions);
 
     console.log("Email response from Resend:", emailResponse);
 
@@ -135,7 +204,8 @@ const handler = async (req: Request): Promise<Response> => {
       testMode: true, 
       sentToTestEmail: testingEmail,
       intendedRecipient: booking.email,
-      emailResponse
+      emailResponse,
+      scheduled: !!scheduleTime
     };
 
     return new Response(JSON.stringify(successResponse), {
