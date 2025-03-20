@@ -133,8 +133,8 @@ const Hero = () => {
               
               <div className="bg-white rounded-3xl overflow-hidden shadow-xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1545173168-9f1947eebb7f?auto=format&fit=crop&q=80&w=2671&ixlib=rb-4.0.3"
-                  alt="Freshly laundered clothes" 
+                  src="/lovable-uploads/c68c2890-7b18-43e5-ae1a-d3d9fec94951.png"
+                  alt="NeatSpin team in orange uniforms" 
                   className="w-full h-auto object-cover aspect-[4/3]"
                 />
               </div>
