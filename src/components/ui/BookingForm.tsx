@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, ArrowRight, CreditCard, Wallet, DollarSign } from 'lucide-react';
@@ -25,7 +26,8 @@ const BookingForm = () => {
     address: '',
     notes: '',
     paymentMethod: '',
-    scheduleEmailFor: ''
+    scheduleEmailFor: '',
+    useTestEmail: true // Default to test mode for safety
   });
   
   const [sentEmailId, setSentEmailId] = useState<string | null>(null);
@@ -35,6 +37,14 @@ const BookingForm = () => {
     setFormData(prevData => ({
       ...prevData,
       [name]: value
+    }));
+  };
+
+  const handleToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: checked
     }));
   };
 
@@ -135,7 +145,8 @@ const BookingForm = () => {
           address: formData.address,
           notes: formData.notes,
           paymentMethod: formData.paymentMethod,
-          scheduleTime: scheduleTime
+          scheduleTime: scheduleTime,
+          useTestEmail: formData.useTestEmail
         },
       });
 
@@ -158,7 +169,7 @@ const BookingForm = () => {
           
           toast({
             title: "Booking Confirmed! (Test Mode)",
-            description: `During development, emails are sent to a test address. In production, the confirmation would be sent to ${formData.email}.${scheduledMsg}`,
+            description: `In test mode, emails are sent to a test address. The confirmation would normally be sent to ${formData.email}.${scheduledMsg}`,
             variant: "default",
           });
         } else {
@@ -181,7 +192,8 @@ const BookingForm = () => {
         address: '',
         notes: '',
         paymentMethod: '',
-        scheduleEmailFor: ''
+        scheduleEmailFor: '',
+        useTestEmail: true
       });
     } catch (error) {
       console.error("Booking error:", error);
@@ -481,6 +493,25 @@ const BookingForm = () => {
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
                   Leave empty to send immediately, or select a future date and time to schedule the confirmation email.
+                </p>
+              </div>
+
+              <div className="mt-4 mb-6">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="useTestEmail"
+                    name="useTestEmail"
+                    checked={formData.useTestEmail}
+                    onChange={handleToggleChange}
+                    className="rounded text-neatspin-500 focus:ring-neatspin-500"
+                  />
+                  <label htmlFor="useTestEmail" className="text-sm text-gray-700">
+                    Use test email mode (sends to test address instead of customer)
+                  </label>
+                </div>
+                <p className="text-sm text-gray-500 mt-1 ml-6">
+                  When unchecked, emails will be sent to the actual customer email address.
                 </p>
               </div>
 

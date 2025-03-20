@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
@@ -24,6 +25,7 @@ interface BookingRequest {
   address: string;
   notes?: string;
   paymentMethod: string;
+  useTestEmail?: boolean; // Added flag to control test mode
 }
 
 interface EmailUpdateRequest {
@@ -123,8 +125,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Attempting to send email with Resend...");
     
-    // Get the allowed email for testing
-    const testingEmail = "adnaanabdulkarim@icloud.com"; // This is the only email allowed during testing
+    // Get the testing email - only used if useTestEmail is true
+    const testingEmail = "adnaanabdulkarim@icloud.com";
+    
+    // Determine email recipient based on useTestEmail flag
+    // By default, send to the customer's email unless explicitly in test mode
+    const recipientEmail = booking.useTestEmail ? testingEmail : booking.email;
+    const isTestMode = booking.useTestEmail === true;
     
     // Get scheduling information if it's provided in the request
     const scheduleTime = booking.scheduleTime || null;
@@ -132,14 +139,14 @@ const handler = async (req: Request): Promise<Response> => {
     // Prepare email sending options
     const emailOptions = {
       from: "NeatSpin Laundry <onboarding@resend.dev>",
-      to: [testingEmail], // Always send to the testing email for now
-      subject: `[TEST] Booking Confirmation for ${booking.name}`,
+      to: [recipientEmail],
+      subject: isTestMode ? `[TEST] Booking Confirmation for ${booking.name}` : `Booking Confirmation for ${booking.name}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px;">
           <div style="text-align: center; margin-bottom: 20px;">
             <h1 style="color: #3b82f6; margin-bottom: 10px;">NeatSpin Laundry</h1>
             <p style="font-size: 18px; color: #333;">Booking Confirmation</p>
-            <p style="font-size: 16px; color: #e11d48; font-weight: bold;">TEST EMAIL - Would normally be sent to: ${booking.email}</p>
+            ${isTestMode ? `<p style="font-size: 16px; color: #e11d48; font-weight: bold;">TEST EMAIL - Would normally be sent to: ${booking.email}</p>` : ''}
           </div>
           
           <div style="margin-bottom: 30px;">
@@ -198,12 +205,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email response from Resend:", emailResponse);
 
-    // Modify the response to handle Resend's testing limitations
+    // Modify the response based on whether we're in test mode or not
     const successResponse = {
       success: true,
-      testMode: true, 
-      sentToTestEmail: testingEmail,
-      intendedRecipient: booking.email,
+      testMode: isTestMode, 
+      sentToEmail: recipientEmail,
       emailResponse,
       scheduled: !!scheduleTime
     };
