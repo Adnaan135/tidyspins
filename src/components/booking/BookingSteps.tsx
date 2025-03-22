@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Clock, ArrowRight, CreditCard, Wallet, DollarSign } from 'lucide-react';
 import ServiceOption from './ServiceOption';
 import PaymentOption from './PaymentOption';
+import PaymentForm from './PaymentForm';
 import { FormData } from './types';
 
 interface BookingStepsProps {
@@ -11,10 +12,12 @@ interface BookingStepsProps {
   formData: FormData;
   isSubmitting: boolean;
   sentEmailId: string | null;
+  paymentClientSecret: string | null;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
   handleToggleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleServiceSelect: (service: string) => void;
   handlePaymentSelect: (paymentMethod: string) => void;
+  handlePaymentComplete: (success: boolean) => void;
   updateScheduledEmail: (updateData: { emailId: string; scheduleTime?: string; cancel?: boolean }) => Promise<void>;
   nextStep: () => void;
   prevStep: () => void;
@@ -26,15 +29,26 @@ const BookingSteps = ({
   formData, 
   isSubmitting, 
   sentEmailId,
+  paymentClientSecret,
   handleChange, 
   handleToggleChange,
   handleServiceSelect, 
   handlePaymentSelect,
+  handlePaymentComplete,
   updateScheduledEmail,
   nextStep, 
   prevStep,
   handleSubmit 
 }: BookingStepsProps) => {
+  const getServicePrice = () => {
+    switch (formData.service) {
+      case 'basic': return 1999;
+      case 'premium': return 2999;
+      case 'family': return 4999;
+      default: return 0;
+    }
+  };
+  
   return (
     <form onSubmit={handleSubmit} className="p-6">
       {step === 1 && (
@@ -264,6 +278,14 @@ const BookingSteps = ({
             />
           </div>
 
+          {(formData.paymentMethod === 'credit-card' || formData.paymentMethod === 'digital-wallet') && (
+            <PaymentForm 
+              clientSecret={paymentClientSecret}
+              onPaymentComplete={handlePaymentComplete}
+              amount={getServicePrice()}
+            />
+          )}
+
           <div className="mt-6 mb-6">
             <label className="block text-gray-700 mb-2">Schedule Confirmation Email (Optional)</label>
             <div className="relative">
@@ -334,7 +356,9 @@ const BookingSteps = ({
             <Button 
               type="submit" 
               className="bg-neatspin-600 hover:bg-neatspin-700 text-white button-hover-effect"
-              disabled={isSubmitting || !formData.paymentMethod}
+              disabled={isSubmitting || !formData.paymentMethod || 
+                ((formData.paymentMethod === 'credit-card' || formData.paymentMethod === 'digital-wallet') && 
+                !paymentClientSecret && formData.paymentStatus !== 'completed')}
             >
               {isSubmitting ? (
                 <span className="flex items-center">
@@ -344,7 +368,7 @@ const BookingSteps = ({
                   </svg>
                   Processing...
                 </span>
-              ) : "Complete Booking"}
+              ) : formData.paymentMethod === 'pay-later' ? "Complete Booking" : "Complete Booking"}
             </Button>
           </div>
           

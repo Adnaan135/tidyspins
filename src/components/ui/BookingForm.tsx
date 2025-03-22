@@ -7,6 +7,7 @@ import BookingProgress from '@/components/booking/BookingProgress';
 import BookingSteps from '@/components/booking/BookingSteps';
 import { FormData, EmailUpdate } from '@/components/booking/types';
 import { updateScheduledEmail as updateEmail } from '@/components/booking/emailService';
+import { createPaymentIntent, getPaymentStatus } from '@/components/booking/paymentService';
 
 const BookingForm = () => {
   const [step, setStep] = useState(1);
@@ -23,10 +24,12 @@ const BookingForm = () => {
     notes: '',
     paymentMethod: '',
     scheduleEmailFor: '',
-    useTestEmail: true // Default to test mode for safety
+    useTestEmail: true, // Default to test mode for safety
+    paymentStatus: 'pending'
   });
   
   const [sentEmailId, setSentEmailId] = useState<string | null>(null);
+  const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -58,6 +61,29 @@ const BookingForm = () => {
     }));
   };
 
+  const handlePaymentComplete = (success: boolean) => {
+    if (success) {
+      setFormData(prev => ({
+        ...prev,
+        paymentStatus: 'completed'
+      }));
+      
+      // Proceed with form submission after successful payment
+      handleFormSubmission();
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        paymentStatus: 'failed'
+      }));
+      
+      toast({
+        title: "Payment Failed",
+        description: "Your payment could not be processed. Please try again or use a different payment method.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const updateScheduledEmail = async (updateData: EmailUpdate) => {
     if (!sentEmailId) {
       toast({
@@ -86,10 +112,36 @@ const BookingForm = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const initializePayment = async () => {
+    if (formData.paymentMethod === 'pay-later') {
+      // Skip payment processing for pay later option
+      handleFormSubmission();
+      return;
+    }
     
+    try {
+      const paymentIntent = await createPaymentIntent(formData.service, formData.email);
+      
+      if (paymentIntent) {
+        setPaymentClientSecret(paymentIntent.clientSecret);
+        setFormData(prev => ({
+          ...prev,
+          paymentIntentId: paymentIntent.id
+        }));
+      } else {
+        throw new Error("Failed to create payment intent");
+      }
+    } catch (error) {
+      console.error("Payment initialization error:", error);
+      toast({
+        title: "Payment Setup Failed",
+        description: "There was a problem setting up the payment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFormSubmission = async () => {
     try {
       const scheduleTime = formData.scheduleEmailFor ? 
         new Date(formData.scheduleEmailFor).toISOString() : undefined;
@@ -106,7 +158,8 @@ const BookingForm = () => {
             phone: formData.phone,
             address: formData.address,
             notes: formData.notes || null,
-            payment_method: formData.paymentMethod
+            payment_method: formData.paymentMethod,
+            status: formData.paymentMethod === 'pay-later' ? 'pending' : 'paid'
           }
         ])
         .select();
@@ -177,8 +230,11 @@ const BookingForm = () => {
         notes: '',
         paymentMethod: '',
         scheduleEmailFor: '',
-        useTestEmail: true
+        useTestEmail: true,
+        paymentStatus: 'pending'
       });
+      
+      setPaymentClientSecret(null);
     } catch (error) {
       console.error("Booking error:", error);
       toast({
@@ -191,7 +247,29 @@ const BookingForm = () => {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    if (formData.paymentMethod === 'pay-later') {
+      // Skip payment processing for pay later option
+      await handleFormSubmission();
+    } else if (paymentClientSecret) {
+      // Payment already initialized, continue with form submission
+      // This will be called after payment completion by the payment component
+    } else {
+      // Initialize payment
+      await initializePayment();
+    }
+  };
+
   const nextStep = () => {
+    // If going to payment step, initialize payment
+    if (step === 3) {
+      // Initialize payment when moving to the payment step
+      // This pre-fetches the payment intent for the payment form
+      initializePayment();
+    }
     setStep(step + 1);
   };
 
@@ -215,10 +293,12 @@ const BookingForm = () => {
           formData={formData}
           isSubmitting={isSubmitting}
           sentEmailId={sentEmailId}
+          paymentClientSecret={paymentClientSecret}
           handleChange={handleChange}
           handleToggleChange={handleToggleChange}
           handleServiceSelect={handleServiceSelect}
           handlePaymentSelect={handlePaymentSelect}
+          handlePaymentComplete={handlePaymentComplete}
           updateScheduledEmail={updateScheduledEmail}
           nextStep={nextStep}
           prevStep={prevStep}
