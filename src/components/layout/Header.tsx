@@ -1,14 +1,16 @@
 
 import { useState, useEffect } from 'react';
-import { X, Menu } from 'lucide-react';
+import { X, Menu, LogOut, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const { user, isAdmin, signOut } = useAuth();
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   
@@ -51,17 +53,40 @@ const Header = () => {
           <a href="#contact" className={`${isScrolled ? 'text-gray-700' : 'text-white'} hover:text-neatspin-500 transition-colors`}>
             Contact
           </a>
-          <Link to="/admin" className={`${isScrolled ? 'text-gray-700' : 'text-white'} hover:text-neatspin-500 transition-colors`}>
-            Admin
-          </Link>
+          {isAdmin && (
+            <Link to="/admin" className={`${isScrolled ? 'text-gray-700' : 'text-white'} hover:text-neatspin-500 transition-colors`}>
+              Admin
+            </Link>
+          )}
         </nav>
         
-        <div className="hidden md:block">
-          <a href="#booking">
-            <Button className="button-hover-effect">
-              Book Now
+        <div className="hidden md:flex items-center space-x-4">
+          {user ? (
+            <Button 
+              variant="outline" 
+              className={`flex items-center space-x-2 ${isScrolled ? 'bg-white' : 'bg-transparent'}`}
+              onClick={signOut}
+            >
+              <LogOut size={16} />
+              <span>Logout</span>
             </Button>
-          </a>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button 
+                  variant="outline" 
+                  className={`${isScrolled ? 'bg-white' : 'bg-transparent'}`}
+                >
+                  Login
+                </Button>
+              </Link>
+              <a href="#booking">
+                <Button className="button-hover-effect">
+                  Book Now
+                </Button>
+              </a>
+            </>
+          )}
         </div>
         
         <button 
@@ -100,14 +125,33 @@ const Header = () => {
               <a href="#contact" className="text-gray-700 py-2 px-4 hover:bg-gray-100 rounded-md">
                 Contact
               </a>
-              <Link to="/admin" className="text-gray-700 py-2 px-4 hover:bg-gray-100 rounded-md">
-                Admin
-              </Link>
-              <a href="#booking" className="mt-2">
-                <Button className="w-full button-hover-effect">
-                  Book Now
+              {isAdmin && (
+                <Link to="/admin" className="text-gray-700 py-2 px-4 hover:bg-gray-100 rounded-md">
+                  Admin
+                </Link>
+              )}
+              
+              {user ? (
+                <Button 
+                  variant="outline" 
+                  className="flex items-center justify-center space-x-2 w-full"
+                  onClick={signOut}
+                >
+                  <LogOut size={16} />
+                  <span>Logout</span>
                 </Button>
-              </a>
+              ) : (
+                <>
+                  <Link to="/login" className="text-gray-700 py-2 px-4 hover:bg-gray-100 rounded-md">
+                    Login
+                  </Link>
+                  <a href="#booking" className="mt-2">
+                    <Button className="w-full button-hover-effect">
+                      Book Now
+                    </Button>
+                  </a>
+                </>
+              )}
             </div>
           </motion.div>
         )}

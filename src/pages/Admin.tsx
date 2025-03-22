@@ -5,6 +5,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { useToast } from "@/hooks/use-toast";
 import { BookingData } from '@/components/booking/types';
+import { useAuth } from '@/context/AuthContext';
 import { 
   Table, 
   TableBody, 
@@ -22,12 +23,15 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchBookings();
-  }, [filterStatus]);
+  }, [filterStatus, user]);
 
   const fetchBookings = async () => {
+    if (!user) return;
+    
     setLoading(true);
     try {
       let query = supabase.from('bookings').select('*');
