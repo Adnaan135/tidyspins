@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import AdminPromotion from "./pages/AdminPromotion";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
@@ -29,6 +30,11 @@ function App() {
               <Route path="/admin" element={
                 <ProtectedRoute requireAdmin={true}>
                   <Admin />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/promote" element={
+                <ProtectedRoute requireAdmin={true}>
+                  <AdminPromotion />
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />

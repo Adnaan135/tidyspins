@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import Header from '@/components/layout/Header';
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
 
 const Admin = () => {
   const [bookings, setBookings] = useState<BookingData[]>([]);
@@ -66,7 +66,6 @@ const Admin = () => {
       
       if (error) throw error;
       
-      // Update local state
       setBookings(bookings.map(booking => 
         booking.id === id ? { ...booking, status } : booking
       ));
@@ -112,11 +111,13 @@ const Admin = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      <main className="flex-grow py-10 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <main className="flex-grow py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Booking Management</h1>
-            <p className="mt-2 text-gray-600">Manage and track all customer bookings</p>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <Link to="/admin/promote">
+              <Button variant="outline">Promote User to Admin</Button>
+            </Link>
           </div>
           
           <Tabs defaultValue="all" className="mb-6">
