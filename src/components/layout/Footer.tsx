@@ -57,8 +57,8 @@ const Footer = () => {
               <li className="flex items-start">
                 <MapPin size={18} className="text-neatspin-500 mt-1 mr-3" />
                 <span className="text-gray-600">
-                  123 Laundry Lane<br />
-                  San Francisco, CA 94107
+                  Ayeduase, Kumasi<br />
+                  Ghana
                 </span>
               </li>
               <li className="flex items-start">

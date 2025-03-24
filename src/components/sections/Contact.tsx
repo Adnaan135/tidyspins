@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -137,7 +138,7 @@ const Contact = () => {
               <h3 className="text-xl font-semibold text-gray-900 mb-6">Our Location</h3>
               <div className="rounded-xl overflow-hidden h-64 bg-gray-200">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.6834834857866!2d-122.40346148488484!3d37.77115712012704!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085807c1705da09%3A0x8d74f4c4c28f7c99!2s123%20Main%20St%2C%20San%20Francisco%2C%20CA%2094105%2C%20USA!5e0!3m2!1sen!2s!4v1627984814739!5m2!1sen!2s"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.193066794256!2d-1.4938088491194295!3d6.67079999372739!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdb96e90192d3b7%3A0x4a7d0d9e47dbd20!2sAyeduase%2C%20Kumasi!5e0!3m2!1sen!2sgh!4v1716299843572!5m2!1sen!2sgh"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
