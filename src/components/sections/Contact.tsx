@@ -113,8 +113,8 @@ const Contact = () => {
                   <div className="ml-4">
                     <h4 className="font-medium text-gray-900">Location</h4>
                     <p className="text-gray-600">
-                      123 Laundry Lane<br />
-                      San Francisco, CA 94107
+                      Ayeduase, Kumasi<br />
+                      Ghana
                     </p>
                   </div>
                 </li>
