@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -15,9 +15,20 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn } = useAuth();
+  const { signIn, user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [user, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +40,11 @@ const Login = () => {
       
       if (signInError) {
         setError(signInError.message);
+        toast({
+          title: "Login failed",
+          description: signInError.message,
+          variant: "destructive",
+        });
         return;
       }
       
@@ -37,10 +53,15 @@ const Login = () => {
         description: "You have been successfully logged in.",
       });
       
-      navigate('/admin');
+      // Navigation will be handled by the useEffect above
     } catch (err) {
       console.error('Login error:', err);
       setError('An unexpected error occurred. Please try again.');
+      toast({
+        title: "Login failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -55,7 +76,7 @@ const Login = () => {
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold">Login</CardTitle>
             <CardDescription>
-              Enter your email and password to access the admin panel
+              Enter your email and password to access your account
             </CardDescription>
           </CardHeader>
           

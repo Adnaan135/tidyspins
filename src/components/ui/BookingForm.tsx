@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import BookingProgress from '@/components/booking/BookingProgress';
 import BookingSteps from '@/components/booking/BookingSteps';
@@ -13,18 +14,20 @@ const BookingForm = () => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+  
   const [formData, setFormData] = useState<FormData>({
     service: '',
     date: '',
     time: '',
     name: '',
-    email: '',
+    email: user?.email || '',
     phone: '',
     address: '',
     notes: '',
     paymentMethod: '',
     scheduleEmailFor: '',
-    useTestEmail: true, // Default to test mode for safety
+    useTestEmail: true,
     paymentStatus: 'pending'
   });
   
@@ -68,7 +71,6 @@ const BookingForm = () => {
         paymentStatus: 'completed'
       }));
       
-      // Proceed with form submission after successful payment
       handleFormSubmission();
     } else {
       setFormData(prev => ({
@@ -104,6 +106,7 @@ const BookingForm = () => {
       });
       
     } catch (error) {
+      console.error('Error updating scheduled email:', error);
       toast({
         title: "Update Failed",
         description: "Failed to update the scheduled email. Please try again.",
@@ -114,7 +117,6 @@ const BookingForm = () => {
 
   const initializePayment = async () => {
     if (formData.paymentMethod === 'pay-later') {
-      // Skip payment processing for pay later option
       handleFormSubmission();
       return;
     }
@@ -146,30 +148,34 @@ const BookingForm = () => {
       const scheduleTime = formData.scheduleEmailFor ? 
         new Date(formData.scheduleEmailFor).toISOString() : undefined;
       
-      const { data: bookingData, error: bookingError } = await supabase
+      const bookingData = {
+        service: formData.service,
+        date: formData.date,
+        time: formData.time,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        notes: formData.notes || null,
+        payment_method: formData.paymentMethod,
+        status: formData.paymentMethod === 'pay-later' ? 'pending' : 'paid'
+      };
+
+      console.log("Saving booking data:", bookingData);
+
+      const { data: savedBooking, error: bookingError } = await supabase
         .from('bookings')
-        .insert([
-          {
-            service: formData.service,
-            date: formData.date,
-            time: formData.time,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            address: formData.address,
-            notes: formData.notes || null,
-            payment_method: formData.paymentMethod,
-            status: formData.paymentMethod === 'pay-later' ? 'pending' : 'paid'
-          }
-        ])
+        .insert([bookingData])
         .select();
 
       if (bookingError) {
+        console.error("Booking save error:", bookingError);
         throw new Error("Failed to save booking: " + bookingError.message);
       }
 
-      console.log("Booking saved to database:", bookingData);
+      console.log("Booking saved successfully:", savedBooking);
       
+      // Send confirmation email
       console.log("Sending confirmation email to:", formData.email);
       const { data: emailData, error: emailError } = await supabase.functions.invoke('send-booking-confirmation', {
         body: {
@@ -218,13 +224,14 @@ const BookingForm = () => {
         }
       }
       
+      // Reset form
       setStep(1);
       setFormData({
         service: '',
         date: '',
         time: '',
         name: '',
-        email: '',
+        email: user?.email || '',
         phone: '',
         address: '',
         notes: '',
@@ -236,7 +243,7 @@ const BookingForm = () => {
       
       setPaymentClientSecret(null);
     } catch (error) {
-      console.error("Booking error:", error);
+      console.error("Booking submission error:", error);
       toast({
         title: "Booking Failed",
         description: "There was a problem processing your booking. Please try again.",
@@ -252,22 +259,16 @@ const BookingForm = () => {
     setIsSubmitting(true);
     
     if (formData.paymentMethod === 'pay-later') {
-      // Skip payment processing for pay later option
       await handleFormSubmission();
     } else if (paymentClientSecret) {
-      // Payment already initialized, continue with form submission
-      // This will be called after payment completion by the payment component
+      // Payment handling will be done by the payment component
     } else {
-      // Initialize payment
       await initializePayment();
     }
   };
 
   const nextStep = () => {
-    // If going to payment step, initialize payment
     if (step === 3) {
-      // Initialize payment when moving to the payment step
-      // This pre-fetches the payment intent for the payment form
       initializePayment();
     }
     setStep(step + 1);
