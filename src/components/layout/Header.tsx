@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Menu, X, User, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -53,14 +54,14 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-neatspin-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">N</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">NeatSpin</span>
+            <span className="text-xl font-bold text-foreground">NeatSpin</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -69,7 +70,7 @@ const Header = () => {
               <button
                 key={item.name}
                 onClick={() => scrollToSection(item.section)}
-                className="text-gray-700 hover:text-neatspin-600 transition-colors"
+                className="text-muted-foreground hover:text-primary transition-colors"
               >
                 {item.name}
               </button>
@@ -78,9 +79,10 @@ const Header = () => {
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
+            <ThemeToggle />
             {user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-muted-foreground">
                   Welcome, {user.email}
                 </span>
                 {isAdmin && (
@@ -135,24 +137,27 @@ const Header = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="md:hidden py-4 border-t border-gray-200"
+            className="md:hidden py-4 border-t border-border"
           >
             <nav className="flex flex-col space-y-4">
               {navItems.map((item) => (
                 <button
                   key={item.name}
                   onClick={() => scrollToSection(item.section)}
-                  className="text-gray-700 hover:text-neatspin-600 transition-colors text-left"
+                  className="text-muted-foreground hover:text-primary transition-colors text-left"
                 >
                   {item.name}
                 </button>
               ))}
               
               {/* Mobile Auth Section */}
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-border space-y-3">
+                <div className="flex justify-start">
+                  <ThemeToggle />
+                </div>
                 {user ? (
                   <div className="flex flex-col space-y-3">
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-muted-foreground">
                       Welcome, {user.email}
                     </span>
                     {isAdmin && (
